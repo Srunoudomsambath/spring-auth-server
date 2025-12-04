@@ -48,8 +48,13 @@ public class UserServiceImpl implements UserService {
                 .familyName(userRequest.familyName())
                 .givenName(userRequest.givenName())
                 .enabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .emailVerified(false)
                 .roles(roles)
                 .build();
+
 
         user = userRepository.save(user);
 
