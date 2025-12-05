@@ -14,8 +14,12 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "@class"
+)
 public class CustomUserDetails implements UserDetails {
 
     private final Long id;

@@ -1,6 +1,5 @@
 package co.istad.authserver.config;
 
-
 import co.istad.authserver.security.CustomUserDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +17,27 @@ import tools.jackson.databind.module.SimpleModule;
 public class JacksonSecurityConfig {
 
     @Bean(name = "securityObjectMapper")
-    public ObjectMapper objectMapper() {
+    public ObjectMapper securityObjectMapper() {
         ClassLoader classLoader = JacksonSecurityConfig.class.getClassLoader();
 
+        // Configure PolymorphicTypeValidator to allow both base classes and subtypes
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfSubType("co.istad.springauthserver.security")
+                // Allow specific custom class
+                .allowIfBaseType(CustomUserDetails.class)
+                .allowIfSubType(CustomUserDetails.class)
+                // Allow Spring Security packages
+                .allowIfBaseType("org.springframework.security")
+                .allowIfSubType("org.springframework.security")
+                // Allow your custom security package
+                .allowIfBaseType("co.istad.authserver.security")
+                .allowIfSubType("co.istad.authserver.security")
+                // Allow Java base types that might be needed
+                .allowIfBaseType(Object.class)
+                .allowIfBaseType("java.util")
+                .allowIfBaseType("java.lang")
                 .build();
 
+        // Map UserDetails interface to CustomUserDetails implementation
         SimpleModule customModule = new SimpleModule();
         customModule.addAbstractTypeMapping(UserDetails.class, CustomUserDetails.class);
 
@@ -33,8 +46,7 @@ public class JacksonSecurityConfig {
                 .findAndAddModules()
                 .addModules(SecurityJacksonModules.getModules(classLoader))
                 .addModule(new OAuth2AuthorizationServerJacksonModule())
-                .addModule(customModule) // <-- critical
+                .addModule(customModule)
                 .build();
     }
-
 }
